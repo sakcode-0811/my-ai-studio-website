@@ -1,0 +1,6 @@
+{
+  "name": "Annapurna Food Donation Network",
+  "description": "Surplus food donation and rescue platform with verified preparation details, food safety validation rules, interactive Leaflet pickup map, and real-time donor-recipient coordination.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

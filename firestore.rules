@@ -1,0 +1,66 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Default catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Donations collection
+    match /donations/{donationId} {
+      // Anyone can view donations (donors, recipients, public feed)
+      allow read: if true;
+
+      // Creation: must be signed in with valid donation fields
+      allow create: if isSignedIn()
+        && request.resource.data.foodName is string
+        && request.resource.data.foodName.size() >= 2
+        && request.resource.data.foodName.size() <= 100
+        && request.resource.data.servings is int
+        && request.resource.data.servings > 0
+        && request.resource.data.prepDate is string
+        && request.resource.data.prepTime is string
+        && request.resource.data.pickupDeadline is string
+        && request.resource.data.pickupAddress is string
+        && request.resource.data.city is string
+        && request.resource.data.category in ['vegetarian', 'non-vegetarian']
+        && request.resource.data.donorId == request.auth.uid;
+
+      // Update: Donor updating listing details OR Recipient claiming available donation
+      allow update: if isSignedIn() && (
+        // Case 1: Owner updating details
+        (resource.data.donorId == request.auth.uid) ||
+        // Case 2: Recipient claiming donation
+        (
+          resource.data.status == 'available' &&
+          request.resource.data.status == 'claimed' &&
+          request.resource.data.claimedBy == request.auth.uid &&
+          request.resource.data.donorId == resource.data.donorId
+        ) ||
+        // Case 3: Completing or reverting claim
+        (
+          resource.data.claimedBy == request.auth.uid ||
+          resource.data.donorId == request.auth.uid
+        )
+      );
+
+      // Deletion: Only donor
+      allow delete: if isSignedIn() && resource.data.donorId == request.auth.uid;
+    }
+
+    // Safety Rules collection
+    match /safety_rules/{ruleId} {
+      allow read: if true;
+      allow write: if isSignedIn();
+    }
+  }
+}

@@ -1,0 +1,206 @@
+{
+  "entities": {
+    "Donation": {
+      "title": "Donation",
+      "description": "A surplus food donation record with preparation details, safety metrics, and pickup coordinates",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the donation"
+        },
+        "foodName": {
+          "type": "string",
+          "description": "Name of the food item (e.g., Veg Biryani, Chapati, Rice, Sandwich)",
+          "minLength": 2,
+          "maxLength": 100
+        },
+        "servings": {
+          "type": "integer",
+          "description": "Number of people the food can serve (positive whole number)"
+        },
+        "prepDate": {
+          "type": "string",
+          "description": "Preparation date in YYYY-MM-DD format"
+        },
+        "prepTime": {
+          "type": "string",
+          "description": "Preparation time in HH:mm format"
+        },
+        "prepTimestamp": {
+          "type": "string",
+          "description": "Combined preparation timestamp in ISO format"
+        },
+        "pickupDeadline": {
+          "type": "string",
+          "description": "Latest date and time when food must be collected in ISO format"
+        },
+        "pickupAddress": {
+          "type": "string",
+          "description": "Full pickup street address",
+          "minLength": 5,
+          "maxLength": 200
+        },
+        "city": {
+          "type": "string",
+          "description": "City for pickup",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "landmark": {
+          "type": "string",
+          "description": "Optional pickup landmark or instructions",
+          "maxLength": 120
+        },
+        "latitude": {
+          "type": "number",
+          "description": "Latitude coordinate for Leaflet map"
+        },
+        "longitude": {
+          "type": "number",
+          "description": "Longitude coordinate for Leaflet map"
+        },
+        "category": {
+          "type": "string",
+          "description": "Food category: vegetarian or non-vegetarian",
+          "enum": ["vegetarian", "non-vegetarian"]
+        },
+        "dietaryTags": {
+          "type": "array",
+          "description": "Additional dietary tags like Vegan, Dairy-Free, Halal"
+        },
+        "description": {
+          "type": "string",
+          "description": "Additional details about ingredients, packaging, and handling",
+          "maxLength": 1000
+        },
+        "packagingType": {
+          "type": "string",
+          "description": "Packaging style: sealed containers, boxed, foil pack, casserole"
+        },
+        "storageCondition": {
+          "type": "string",
+          "description": "Storage condition: room_temperature, refrigerated, heated_insulated",
+          "enum": ["room_temperature", "refrigerated", "heated_insulated"]
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "Image URL or photo of the food"
+        },
+        "contactName": {
+          "type": "string",
+          "description": "Contact person name",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "contactPhone": {
+          "type": "string",
+          "description": "Phone number for pickup coordination",
+          "minLength": 5,
+          "maxLength": 25
+        },
+        "contactAltPhone": {
+          "type": "string",
+          "description": "Alternative phone number or notes",
+          "maxLength": 50
+        },
+        "donorId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the donor"
+        },
+        "donorEmail": {
+          "type": "string",
+          "description": "Email address of the donor"
+        },
+        "status": {
+          "type": "string",
+          "description": "Current status of the donation",
+          "enum": ["available", "claimed", "completed", "cancelled", "expired"]
+        },
+        "claimedBy": {
+          "type": "string",
+          "description": "UID or name of the claimant / recipient / NGO"
+        },
+        "claimedByName": {
+          "type": "string",
+          "description": "Name or organization of claimant"
+        },
+        "claimedAt": {
+          "type": "string",
+          "description": "ISO timestamp when claimed"
+        },
+        "safetyRating": {
+          "type": "string",
+          "description": "Freshness status: fresh, warning, critical, expired",
+          "enum": ["fresh", "warning", "critical", "expired"]
+        },
+        "safetyNotes": {
+          "type": "string",
+          "description": "Calculated safety advice based on rules"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of creation"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update"
+        }
+      },
+      "required": [
+        "foodName",
+        "servings",
+        "prepDate",
+        "prepTime",
+        "pickupDeadline",
+        "pickupAddress",
+        "city",
+        "latitude",
+        "longitude",
+        "category",
+        "contactName",
+        "contactPhone"
+      ]
+    },
+    "SafetyRule": {
+      "title": "SafetyRule",
+      "description": "Configurable food safety shelf-life duration rules",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string",
+          "enum": ["vegetarian", "non-vegetarian", "all"]
+        },
+        "storageCondition": {
+          "type": "string",
+          "enum": ["room_temperature", "refrigerated", "heated_insulated"]
+        },
+        "maxSafeHours": {
+          "type": "number",
+          "description": "Maximum hours after prep time before food is considered unsafe"
+        },
+        "warningHours": {
+          "type": "number",
+          "description": "Hours after prep time when warning badge is shown"
+        },
+        "description": {
+          "type": "string"
+        }
+      },
+      "required": ["category", "storageCondition", "maxSafeHours", "warningHours"]
+    }
+  },
+  "firestore": {
+    "/donations/{donationId}": {
+      "schema": "Donation",
+      "description": "Surplus food donation records submitted by donors and claimable by recipients"
+    },
+    "/safety_rules/{ruleId}": {
+      "schema": "SafetyRule",
+      "description": "Configurable safety parameters for food longevity"
+    }
+  }
+}
